@@ -41,8 +41,8 @@ Each agent is powered by Google's Gemini model and communicates via structured P
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your-username/draconic-case-study.git
-   cd draconic-case-study
+   git clone https://github.com/jbittu/bittu_jaiswal_case_study.git
+   cd bittu_jaiswal_case_study
    ```
 2. **Create a virtual environment (recommended):**
 
