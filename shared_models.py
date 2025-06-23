@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from enum import Enum
 
 
-# Enums used across the system
+
 class Sentiment(Enum):
     """Represents the sentiment of a support ticket."""
     POSITIVE = "positive"
@@ -27,7 +27,7 @@ class Department(Enum):
     ACCOUNT_MANAGEMENT = "Account_Management"
     SECURITY = "Security"
     TECHNICAL_SUPPORT = "Technical_Support"
-    FEATURE_REQUEST = "Feature_Request" # Added FEATURE_REQUEST here
+    FEATURE_REQUEST = "Feature_Request" 
 
 class CustomerTier(Enum):
     """Represents the customer's service tier."""
@@ -35,7 +35,7 @@ class CustomerTier(Enum):
     PREMIUM = "premium"
     ENTERPRISE = "enterprise"
 
-# Input Model for a Support Ticket
+
 class SupportTicket(BaseModel):
     """Represents the structure of an incoming customer support ticket."""
     ticket_id: str
@@ -46,7 +46,7 @@ class SupportTicket(BaseModel):
     monthly_revenue: float
     account_age_days: int
 
-# Output Models for individual Agents
+
 class SentimentAnalysisOutput(BaseModel):
     """Output structure for the Sentiment Agent."""
     sentiment: Sentiment
@@ -63,7 +63,7 @@ class TicketRoutingOutput(BaseModel):
     summary: str = Field(description="A brief summary of the ticket for the receiving department.")
     reasoning: str = Field(description="Detailed reasoning for the routing decision.")
 
-# Combined Output Model for the overall system
+
 class AgentOutput(BaseModel):
     """Combines the outputs from all agents into a single comprehensive result."""
     sentiment: Sentiment

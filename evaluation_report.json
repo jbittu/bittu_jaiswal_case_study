@@ -1,0 +1,87 @@
+{
+    "SUP-001": {
+        "agent_output": {
+            "sentiment": "urgent",
+            "priority": "critical",
+            "routed_to_department": "Technical_Support",
+            "summary": "The ticket describes a critical issue where the user can't log in and claims the product is broken.",
+            "reasoning": "Sentiment Reason: The user reports an inability to log in, which constitutes a critical issue requiring immediate attention. They also express extreme dissatisfaction, but the inability to log in takes precedence.\nPriority Reason: The user reports an inability to log in, which constitutes a complete service outage. This aligns with the criteria for a 'critical' priority, regardless of customer tier or revenue.\nRouting Reason: The inability to log in and the description of the product as 'completely broken' indicates a technical issue requiring immediate attention and likely engineering intervention. The urgent sentiment and critical priority further reinforce this routing."
+        },
+        "expected_output": {
+            "sentiment": "urgent",
+            "priority": "critical",
+            "routed_to_department": "Technical_Support"
+        },
+        "routing_correct": true,
+        "priority_correct": true,
+        "sentiment_correct": true
+    },
+    "SUP-002": {
+        "agent_output": {
+            "sentiment": "neutral",
+            "priority": "low",
+            "routed_to_department": "Technical_Support",
+            "summary": "The ticket reports a minor UI issue (misaligned numbers on mobile dashboard) from an enterprise customer. This is a technical issue, likely a bug.",
+            "reasoning": "Sentiment Reason: The customer reports a minor UI issue with no emotional language. It's a factual observation, not a feature request or critical problem.\nPriority Reason: The issue is a minor UI problem (misaligned dashboard numbers on mobile), not a service outage, data loss, or security concern. Despite the customer being enterprise and generating significant revenue, the impact is minimal, thus 'low' priority is appropriate.\nRouting Reason: The issue is described as a 'UI issue,' specifically misalignment of numbers on the dashboard. This falls under technical problems requiring engineering to investigate and resolve. While the customer is enterprise, the issue itself is a minor technical bug. Thus, routing to Technical_Support."
+        },
+        "expected_output": {
+            "sentiment": "neutral",
+            "priority": "low",
+            "routed_to_department": "Technical_Support"
+        },
+        "routing_correct": true,
+        "priority_correct": true,
+        "sentiment_correct": true
+    },
+    "SUP-003": {
+        "agent_output": {
+            "sentiment": "positive",
+            "priority": "medium",
+            "routed_to_department": "Feature_Request",
+            "summary": "Ticket SUP-003 is a feature request for bulk export functionality.",
+            "reasoning": "Sentiment Reason: The ticket contains a feature request, which is classified as 'positive'.\nPriority Reason: The request is for a new feature (bulk export) which, while beneficial for a premium customer generating $5000 monthly revenue, does not represent a service outage, security risk, or immediate data loss. The sentiment is positive, indicating no immediate frustration with the current system. The issue can be addressed in a reasonable timeframe without causing significant disruption. Therefore a 'medium' priority is appropriate.\nRouting Reason: The customer explicitly requests a new feature (bulk export), which falls under the Feature_Request department. The subject and message clearly indicate a desire for a new functionality to be added to the product."
+        },
+        "expected_output": {
+            "sentiment": "positive",
+            "priority": "medium",
+            "routed_to_department": "Feature_Request"
+        },
+        "routing_correct": true,
+        "priority_correct": true,
+        "sentiment_correct": true
+    },
+    "SUP-004": {
+        "agent_output": {
+            "sentiment": "negative",
+            "priority": "high",
+            "routed_to_department": "Technical_Support",
+            "summary": "The customer is experiencing API rate limiting issues despite the documentation stating they should have a higher limit. This requires technical investigation.",
+            "reasoning": "Sentiment Reason: The customer is experiencing an issue where they are being rate limited, which contradicts the documented rate limits. This is causing them frustration and indicates a problem with the service or documentation.\nPriority Reason: The customer is a premium tier and is encountering an issue that directly impacts their ability to use the API effectively, resulting in a negative sentiment. The API rate limits issue prevents them from utilizing their purchased service as expected. Although not a complete outage, the discrepancy between documented limits and actual performance significantly degrades their service, warranting a 'high' priority.\nRouting Reason: The issue involves API rate limits and a discrepancy with documented limits, indicating a potential bug or configuration issue. This falls under technical troubleshooting and requires engineering intervention. The customer's premium tier and high priority further support routing to Technical Support."
+        },
+        "expected_output": {
+            "sentiment": "negative",
+            "priority": "high",
+            "routed_to_department": "Technical_Support"
+        },
+        "routing_correct": true,
+        "priority_correct": true,
+        "sentiment_correct": true
+    },
+    "SUP-005": {
+        "agent_output": {
+            "sentiment": "urgent",
+            "priority": "critical",
+            "routed_to_department": "Security",
+            "summary": "Enterprise customer reports a potential information disclosure vulnerability in API responses.",
+            "reasoning": "Sentiment Reason: The ticket reports a potential security vulnerability, which requires immediate attention.\nPriority Reason: The ticket describes a potential security vulnerability (information disclosure), which qualifies for the highest severity.\nRouting Reason: The ticket explicitly mentions a security vulnerability (internal server paths in API responses), which is a security concern. The customer is also an enterprise tier with high monthly revenue, which warrants immediate security attention."
+        },
+        "expected_output": {
+            "sentiment": "urgent",
+            "priority": "critical",
+            "routed_to_department": "Security"
+        },
+        "routing_correct": true,
+        "priority_correct": true,
+        "sentiment_correct": true
+    }
+}

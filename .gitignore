@@ -1,15 +1,8 @@
 .env
 venv/
-
 .venv/ 
-
 __pycache__/
 *.pyc
-
-.idea/      # For PyCharm
-.vscode/    # For VS Code
-
-*.json
 
 *.log
 *.sqlite3

@@ -1,11 +1,9 @@
 import pytest
-from pathlib import Path
-from main import process_ticket
-from shared_models import SupportTicket, Sentiment, Priority, Department, CustomerTier
-from evaluation.evaluator import Evaluator # To use the evaluator for reporting
 import json
+from main import process_ticket
+from shared_models import SupportTicket, Sentiment, Priority, Department
+from evaluation.evaluator import Evaluator
 
-# Define your ground truth expected outputs
 EXPECTED_OUTPUTS = {
     "SUP-001": {"sentiment": Sentiment.URGENT, "priority": Priority.CRITICAL, "routed_to_department": Department.TECHNICAL_SUPPORT},
     "SUP-002": {"sentiment": Sentiment.NEUTRAL, "priority": Priority.LOW, "routed_to_department": Department.TECHNICAL_SUPPORT},
@@ -16,8 +14,7 @@ EXPECTED_OUTPUTS = {
 
 @pytest.fixture(scope="module")
 def test_tickets():
-    """Provides a list of SupportTicket objects for testing."""
-    test_data = [
+    data = [
         {
             "ticket_id": "SUP-001",
             "customer_tier": "free",
@@ -64,50 +61,40 @@ def test_tickets():
             "account_age_days": 900
         }
     ]
-    return [SupportTicket(**data) for data in test_data]
-
+    return [SupportTicket(**d) for d in data]
 
 @pytest.mark.parametrize("ticket_id", EXPECTED_OUTPUTS.keys())
 def test_ticket_processing_accuracy(ticket_id, test_tickets):
-    """
-    Tests the end-to-end processing of a single ticket against expected outputs.
-    """
     ticket = next(t for t in test_tickets if t.ticket_id == ticket_id)
     expected = EXPECTED_OUTPUTS[ticket_id]
-
-    print(f"\nTesting Ticket: {ticket.ticket_id}")
     try:
         agent_output = process_ticket(ticket)
-        print(f"  Agent Sentiment: {agent_output.sentiment.value}, Expected: {expected['sentiment'].value}")
-        print(f"  Agent Priority: {agent_output.priority.value}, Expected: {expected['priority'].value}")
-        print(f"  Agent Department: {agent_output.routed_to_department.value}, Expected: {expected['routed_to_department'].value}")
-
-        assert agent_output.sentiment == expected["sentiment"], f"Sentiment mismatch for {ticket_id}. Got {agent_output.sentiment.value}, expected {expected['sentiment'].value}"
-        assert agent_output.priority == expected["priority"], f"Priority mismatch for {ticket_id}. Got {agent_output.priority.value}, expected {expected['priority'].value}"
-        assert agent_output.routed_to_department == expected["routed_to_department"], f"Routing mismatch for {ticket_id}. Got {agent_output.routed_to_department.value}, expected {expected['routed_to_department'].value}"
-
+        assert agent_output.sentiment == expected["sentiment"], f"Sentiment mismatch for {ticket_id}"
+        assert agent_output.priority == expected["priority"], f"Priority mismatch for {ticket_id}"
+        assert agent_output.routed_to_department == expected["routed_to_department"], f"Routing mismatch for {ticket_id}"
     except Exception as e:
         pytest.fail(f"Error processing ticket {ticket_id}: {e}")
 
-# This part can be used to generate a full evaluation report after all tests run
-# You can uncomment and adapt if you want a separate report besides pytest's own output.
 def test_full_evaluation_report(test_tickets):
-    """
-    Runs all test cases and generates a combined evaluation report.
-    This test serves as an aggregation step and doesn't perform assertions itself.
-    """
     processed_results = {}
+
+    print("\n--- Begin Full Evaluation ---")
     for ticket in test_tickets:
         try:
             agent_output = process_ticket(ticket)
-            processed_results[ticket.ticket_id] = agent_output.model_dump()
+            model_data = agent_output.model_dump()
+            print(f" Processed {ticket.ticket_id}")
+            processed_results[ticket.ticket_id] = model_data
         except Exception as e:
+            print(f" Error processing {ticket.ticket_id}: {e}")
             processed_results[ticket.ticket_id] = {"error": str(e), "message": ticket.message}
-            print(f"Error processing ticket {ticket.ticket_id} for evaluation: {e}")
+
+    print(f"\n Total tickets processed: {len(processed_results)}")
+    print(f" Tickets: {list(processed_results.keys())}")
 
     evaluator = Evaluator()
     evaluator.evaluate(processed_results, EXPECTED_OUTPUTS)
 
-    # Optional: Save the detailed results from the evaluator if desired
     with open("evaluation_report.json", "w") as f:
         json.dump(evaluator.detailed_results, f, indent=4)
+    print("\n evaluation_report.json saved successfully.")
