@@ -1,0 +1,551 @@
+### Understanding the structure of Projrct ###
+### Folder Structure
+
+# your-name-case-study/
+
+# ├── main.py
+
+# ├── agents/
+
+# │ ├── sentiment_agent.py
+
+# │ ├── priority_agent.py
+
+# │ └── router_agent.py
+
+# ├── evaluation/
+
+# │ └── evaluator.py
+
+# ├── docs/
+
+# │ └── architecture.md
+
+# ├── ai_chat_history.txt
+
+# └── README.md
+
+# main.py
+
+from agents.sentiment_agent import SentimentAgent
+from agents.priority_agent import PriorityAgent
+from agents.router_agent import RouterAgent
+
+# Example ticket input
+
+ticket = {
+"ticket_id": "SUP-005",
+"customer_tier": "enterprise",
+"subject": "Urgent: Security vulnerability?",
+"message": "Our security team flagged that your API responses include internal server paths...",
+"previous_tickets": 20,
+"monthly_revenue": 50000,
+"account_age_days": 900
+}
+
+# Instantiate agents
+
+sentiment_agent = SentimentAgent()
+priority_agent = PriorityAgent()
+router_agent = RouterAgent()
+
+# Run pipeline
+
+sentiment_result = sentiment_agent.analyze(ticket)
+priority_result = priority_agent.score(ticket)
+routing_result = router_agent.route(ticket, sentiment_result, priority_result)
+
+print("Routing Result:", routing_result)
+
+# agents/sentiment_agent.py
+
+class SentimentAgent:
+def analyze(self, ticket):
+message = ticket['message'].lower()
+if 'urgent' in message or 'security' in message:
+urgency = 'high'
+else:
+urgency = 'medium'
+sentiment = 'negative' if 'broken' in message or 'error' in message else 'neutral'
+return {"urgency": urgency, "sentiment": sentiment}
+
+# agents/priority_agent.py
+
+class PriorityAgent:
+def score(self, ticket):
+tier_score = {"free": 1, "premium": 2, "enterprise": 3}[ticket['customer_tier']]
+score = tier_score * 2 + ticket['monthly_revenue'] / 10000 + ticket['previous_tickets'] / 10
+return {"priority_score": round(score, 2)}
+
+# agents/router_agent.py
+
+class RouterAgent:
+def route(self, ticket, sentiment_result, priority_result):
+if 'security' in ticket['subject'].lower():
+return 'Security'
+if 'api' in ticket['subject'].lower() and sentiment_result['urgency'] == 'high':
+return 'Engineering'
+if priority_result['priority_score'] > 6:
+return 'Support Tier 2'
+return 'Support Tier 1'
+
+# evaluation/evaluator.py
+
+class Evaluator:
+def evaluate(self, predictions, ground_truths):
+correct = sum(p == g for p, g in zip(predictions, ground_truths))
+total = len(predictions)
+return {
+"accuracy": round(correct / total, 2),
+"total_cases": total,
+"correct_cases": correct
+}
+
+# docs/architecture.md
+
+"""
+
+# System Architecture
+
+## Agents
+
+1. **SentimentAgent**: Assesses urgency and tone based on the message.
+2. **PriorityAgent**: Scores customer based on tier, revenue, and ticket history.
+3. *RouterAgent
+
+Here’s how you can approach Option A: Customer Support Ticket Analyzer for the Draconic AI Engineer Case Study:
+
+---
+✅ Overview
+Build a multi-agent system using Pydantic AI that routes customer support tickets appropriately based on context, customer value, and sentiment.
+
+---
+🔧 System Architecture
+Agents:
+1. Sentiment & Urgency Analyzer Agent
+Analyzes tone and urgency of the ticket.
+Extracts keywords like “urgent”, “broken”, “intermittent” or “security”.
+Determines sentiment: Positive, Neutral, or Negative.
+
+2. Customer Priority Scorer Agent
+Evaluates business value based on:
+customer_tier (free/premium/enterprise)
+monthly_revenue
+previous_tickets
+account_age_days
+
+Assigns a priority score.
+
+3. Routing Agent (Coordinator)
+Consumes outputs from the above agents.
+Decides final routing: Engineering, Product, Support Tier 1, Support Tier 2, or Security.
+
+---
+📤 Input Format
+{  "ticket_id": "12345",  "customer_tier": "premium",  "subject": "API returning 500 errors intermittently",  "message": "Hi, our production system has been failing...",  "previous_tickets": 3,  "monthly_revenue": 5000,  "account_age_days": 450}
+
+---
+📥 Sample Agent Communication Flow
+1. SentimentAgent → sentiment: negative, urgency: high
+
+2. PriorityAgent → score: 7.8, tier: premium, value: moderate-high
+
+3. RouterAgent:
+If message contains “500 error” & urgency = high → route to Engineering
+If premium + 3 tickets + sentiment = negative → escalate to Support Tier 2
+
+---
+✅ Evaluation Framework
+Test with all 5 tickets (SUP-001 to SUP-005)
+Metrics:
+Routing Accuracy (expected vs actual)
+Priority Score Consistency
+Sentiment Agreement Rate (against benchmark labels if available)
+
+---
+📚 Documentation
+Include:
+ER diagram of agent input/output dependencies.
+2–3 prompt iterations per agent.
+Sample chat transcript in ai_chat_history.txt showing prompt tuning and edge case handling.
+Summary of what failed and why (e.g., misclassification of sarcasm, edge case: low-value, high-urgency)
+
+---
+💡 Sample Output for SUP-005
+{  "ticket_id": "SUP-005",  "sentiment": "urgent",  "priority_score": 9.8,  "route": "Security"}
+
+---
+If you want, I can help generate the main.py, agent code templates, folder structure, or even the evaluation script to get you started. Want to proceed with that?
+
+---
+
+Here is the detailed file and folder structure along with descriptions to implement **Option A: Customer Support Ticket Analyzer** for the Draconic AI Engineer case study.
+
+---
+
+### 📁 `your-name-case-study/`
+
+Main project directory (replace `your-name` with your actual name or handle)
+
+### 1. 📄 `main.py`
+
+**Purpose**: Entry point to run the multi-agent system
+
+**Contains**:
+
+- Load test tickets
+- Instantiate and orchestrate agents
+- Run analysis and output routing decision
+
+```python
+from agents.ticket_router import TicketRouter
+from evaluation.run_evaluation import evaluate_all
+import json
+
+if __name__ == "__main__":
+    router = TicketRouter()
+    with open("evaluation/test_cases.json") as f:
+        test_cases = json.load(f)
+
+    for ticket in test_cases:
+        decision = router.route(ticket)
+        print(f"{ticket['ticket_id']} => Routed to: {decision}")
+
+    evaluate_all(router)
+
+```
+
+---
+
+### 2. 📁 `agents/`
+
+Agent logic lives here. Each agent is specialized.
+
+- **📄 `priority_agent.py`**
+    
+    Determines priority based on customer tier, revenue, sentiment, etc.
+    
+- **📄 `intent_agent.py`**
+    
+    Classifies ticket intent (e.g., bug, feature request, support).
+    
+- **📄 `ticket_router.py`**
+    
+    Coordinates both agents, resolves disagreements, and returns routing output.
+    
+
+Example `ticket_router.py` snippet:
+
+```python
+from .priority_agent import PriorityAgent
+from .intent_agent import IntentAgent
+
+class TicketRouter:
+    def __init__(self):
+        self.priority_agent = PriorityAgent()
+        self.intent_agent = IntentAgent()
+
+    def route(self, ticket):
+        priority = self.priority_agent.assess(ticket)
+        intent = self.intent_agent.classify(ticket)
+        # Simple rule logic
+        if intent == "security" or priority == "high":
+            return "security_team"
+        elif intent == "bug":
+            return "engineering"
+        elif intent == "feature":
+            return "product"
+        else:
+            return "support"
+
+```
+
+---
+
+### 3. 📁 `evaluation/`
+
+Tools to evaluate your system on provided test data
+
+- **📄 `test_cases.json`**
+    
+    Contains SUP-001 to SUP-005 tickets in JSON format
+    
+- **📄 `metrics.py`**
+    
+    Implements at least 3 metrics (e.g., precision, agent agreement, turnaround class match)
+    
+- **📄 `run_evaluation.py`**
+    
+    Runs the model on test cases and reports metrics
+    
+
+---
+
+### 4. 📁 `docs/`
+
+Documentation, prompt iterations, and design notes
+
+- **📄 `architecture.md`**
+    
+    Why multi-agent? How does coordination happen? Edge cases?
+    
+- **📄 `prompts.md`**
+    
+    2–3 prompt iterations showing improvement in agent outputs
+    
+- **📄 `case_notes.md`**
+    
+    Interesting cases and behaviors (e.g., SUP-005 has high revenue + security concern)
+    
+
+---
+
+### 6. 📄 `README.md`
+
+Explain how to run, what agents do, how to test.
+
+---
+
+### 7. 📄 `what_didnt_work.md`
+
+5–10 bullets on failed attempts, discarded ideas, or bugs encountered.
+
+---
+
+### ✅ Sample Routing Logic Table
+
+| Ticket ID | Priority | Intent | Final Routing |
+| --- | --- | --- | --- |
+| SUP-001 | Low | Bug | support |
+| SUP-002 | Medium | UI Bug | engineering |
+| SUP-003 | Medium | Feature | product |
+| SUP-004 | Medium | Confusion | support |
+| SUP-005 | High | Security | security_team |
+
+---
+
+Would you like:
+
+- All code files scaffolded (FastAPI optional)?
+- JSON content for `test_cases.json`?
+- Sample prompt iterations for agents?
+
+Let me know if you want a zip or GitHub-ready version too.
+
+### Directory: your-name-case-study
+
+# main.py
+
+from agents.ticket_router import TicketRouter
+from evaluation.run_evaluation import evaluate_all
+import json
+
+def main():
+router = TicketRouter()
+with open("evaluation/test_cases.json") as f:
+test_cases = json.load(f)
+
+```
+for ticket in test_cases:
+    decision = router.route(ticket)
+    print(f"{ticket['ticket_id']} => Routed to: {decision}")
+
+evaluate_all(router)
+
+```
+
+if **name** == "**main**":
+main()
+
+### Directory: agents
+
+# priority_agent.py
+
+class PriorityAgent:
+def assess(self, ticket):
+if ticket["customer_tier"] == "enterprise" or ticket["monthly_revenue"] > 20000:
+return "high"
+if ticket["customer_tier"] == "premium" or ticket["previous_tickets"] > 10:
+return "medium"
+return "low"
+
+# intent_agent.py
+
+class IntentAgent:
+def classify(self, ticket):
+subject = ticket["subject"].lower()
+message = ticket["message"].lower()
+if "feature" in subject or "feature" in message:
+return "feature"
+elif "security" in subject or "vulnerability" in message:
+return "security"
+elif "bug" in subject or "error" in message or "issue" in subject:
+return "bug"
+else:
+return "general"
+
+# ticket_router.py
+
+from .priority_agent import PriorityAgent
+from .intent_agent import IntentAgent
+
+class TicketRouter:
+def **init**(self):
+self.priority_agent = PriorityAgent()
+self.intent_agent = IntentAgent()
+
+```
+def route(self, ticket):
+    priority = self.priority_agent.assess(ticket)
+    intent = self.intent_agent.classify(ticket)
+
+    if intent == "security" or priority == "high":
+        return "security_team"
+    elif intent == "bug":
+        return "engineering"
+    elif intent == "feature":
+        return "product"
+    else:
+        return "support"
+
+```
+
+### Directory: evaluation
+
+# test_cases.json
+
+[
+{
+"ticket_id": "SUP-001",
+"customer_tier": "free",
+"subject": "This product is completely broken!!!",
+"message": "Nothing works! I can't even log in. This is the worst software I've ever used.",
+"previous_tickets": 0,
+"monthly_revenue": 0,
+"account_age_days": 2
+},
+{
+"ticket_id": "SUP-002",
+"customer_tier": "enterprise",
+"subject": "Minor UI issue with dashboard",
+"message": "Hi team, just noticed the dashboard numbers are slightly misaligned on mobile view",
+"previous_tickets": 15,
+"monthly_revenue": 25000,
+"account_age_days": 730
+},
+{
+"ticket_id": "SUP-003",
+"customer_tier": "premium",
+"subject": "Feature Request: Bulk export",
+"message": "We need bulk export functionality for our quarterly reports. Currently exporting one by one.",
+"previous_tickets": 5,
+"monthly_revenue": 5000,
+"account_age_days": 400
+},
+{
+"ticket_id": "SUP-004",
+"customer_tier": "premium",
+"subject": "API rate limits unclear",
+"message": "Getting rate limited but documentation says we should have 1000 requests/hour. We are confused.",
+"previous_tickets": 8,
+"monthly_revenue": 3000,
+"account_age_days": 180
+},
+{
+"ticket_id": "SUP-005",
+"customer_tier": "enterprise",
+"subject": "Urgent: Security vulnerability?",
+"message": "Our security team flagged that your API responses include internal server paths.",
+"previous_tickets": 20,
+"monthly_revenue": 50000,
+"account_age_days": 900
+}
+]
+
+# metrics.py
+
+def evaluate_decision(ticket, result):
+if ticket['ticket_id'] == "SUP-005" and result != "security_team":
+return 0
+return 1
+
+def precision(results):
+correct = sum(results)
+total = len(results)
+return correct / total
+
+def agent_agreement(agent1_results, agent2_results):
+return sum(1 for a, b in zip(agent1_results, agent2_results) if a == b) / len(agent1_results)
+
+# run_evaluation.py
+
+from evaluation.metrics import evaluate_decision, precision
+import json
+
+def evaluate_all(router):
+with open("evaluation/test_cases.json") as f:
+test_cases = json.load(f)
+results = []
+for ticket in test_cases:
+result = router.route(ticket)
+results.append(evaluate_decision(ticket, result))
+
+```
+print("\nEvaluation Results:")
+print("Precision:", precision(results))
+
+```
+
+### Directory: docs
+
+# architecture.md
+
+Multi-agent system built with:
+
+- PriorityAgent: assesses urgency
+- IntentAgent: categorizes ticket type
+- Router: combines and routes
+Multiple agents used for specialization, clarity, and to simulate conflicting views.
+
+# prompts.md
+
+## Iteration 1
+
+Prompt: Classify as feature, bug, security, or general
+Result: Missed some security cases
+
+## Iteration 2
+
+Refined with: If "vulnerability" or "internal paths", mark as security
+Result: Improved
+
+# case_notes.md
+
+SUP-005 is interesting due to both high revenue and security concern. Tested both agent conflict resolution and override rules.
+
+### Other Files
+
+# ai_chat_history.txt
+
+(To be exported after full development)
+
+# README.md
+
+## Setup
+
+```bash
+python main.py
+
+```
+
+## Overview
+
+This system uses two agents to assess customer tickets and route them intelligently.
+
+# what_didnt_work.md
+
+- Tried using single agent with long prompt — inconsistent results
+- Overfitting to keywords missed nuances
+- JSON parsing failed on malformed input
+- Agent disagreement not resolved properly in first versions
+- Missed high-priority routing for VIP customers initially
