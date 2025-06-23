@@ -1,5 +1,6 @@
 from shared_models import Sentiment, Priority, Department
 from collections import defaultdict
+from enum import Enum
 
 class Evaluator:
     def __init__(self):

@@ -1,30 +1,44 @@
-from agents.base_agent import BaseAgent
-from shared_models import SupportTicket, Sentiment, Priority, Department, RoutingOutput
+from .base_agent import BaseAgent
+from shared_models import SupportTicket, Sentiment, Priority, TicketRoutingOutput
 
 class RouterAgent(BaseAgent):
-    def route_ticket(self, ticket: SupportTicket, sentiment: Sentiment, priority: Priority) -> RoutingOutput:
-        department_list = ', '.join([d.value for d in Department])
+    def __init__(self):
+        super().__init__()
+
+    def run(self, ticket: SupportTicket, sentiment: Sentiment, priority: Priority) -> TicketRoutingOutput:
+        return self.route_ticket(ticket, sentiment, priority)
+
+    def route_ticket(self, ticket: SupportTicket, sentiment: Sentiment, priority: Priority) -> TicketRoutingOutput:
         prompt = f"""
-        Route the following customer support ticket to the most appropriate department.
-        Consider the subject, message content, assigned sentiment, and priority.
-        Possible departments: {department_list}.
+Route the following support ticket to the most appropriate department.
+Choose ONLY from: "Technical", "Billing", "Sales", "Customer_Support", "Account_Management", "Security", "Technical_Support", "Feature_Request".
 
-        Guidelines:
-        - 'Technical Support': API errors, software bugs, login issues, technical queries.
-        - 'Billing': Questions about invoices, payments, subscriptions.
-        - 'Feature Request': Suggestions for new features or enhancements.
-        - 'Sales': Inquiries about new products, upgrades, or partnerships.
-        - 'Security': Reported vulnerabilities, suspicious activity (especially if sentiment is 'urgent').
-        - 'Urgent Response Team': For 'critical' priority tickets, especially involving security or major outages impacting enterprise clients. Route critical security issues here.
-        - 'General Inquiry': For anything that doesn't fit the above categories.
+Guidelines:
+- "Technical_Support": For technical issues, bugs, API errors, outages, or anything requiring engineering intervention.
+- "Technical": For general technical queries (if not a support issue).
+- "Billing": Invoices, payments, subscriptions, refunds.
+- "Sales": New features, upgrades, demos, pre-sales.
+- "Customer_Support": How-to, account updates (non-billing), minor issues.
+- "Account_Management": Enterprise/high-revenue customer relationship management.
+- "Security": Security vulnerabilities, breaches, or suspicious activity.
+- "Feature_Request": Explicit feature requests.
 
-        Ticket ID: {ticket.ticket_id}
-        Customer Tier: {ticket.customer_tier.value}
-        Subject: {ticket.subject}
-        Message: {ticket.message}
-        Detected Sentiment: {sentiment.value}
-        Assigned Priority: {priority.value}
+Ticket Data:
+- Ticket ID: {ticket.ticket_id}
+- Customer Tier: {ticket.customer_tier.value}
+- Subject: {ticket.subject}
+- Message: {ticket.message}
+- Previous Tickets: {ticket.previous_tickets}
+- Monthly Revenue: ${ticket.monthly_revenue:.2f}
+- Account Age: {ticket.account_age_days} days
+- Sentiment: {sentiment.value}
+- Priority: {priority.value}
 
-        Provide your routing decision in JSON format, including the department, a brief summary of the ticket and recommended action, and the reasoning for the routing decision.
-        """
-        return self._generate_content(prompt, RoutingOutput)
+Respond ONLY in this JSON format, strictly matching the TicketRoutingOutput schema:
+{{
+  "routed_to_department": "department_name",
+  "summary": "A brief summary of the ticket and why it was routed this way.",
+  "reasoning": "Detailed reasoning for the routing decision."
+}}
+"""
+        return self._generate_content(prompt, TicketRoutingOutput)

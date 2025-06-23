@@ -1,32 +1,33 @@
 import google.generativeai as genai
-from pydantic import BaseModel
-import os
 from dotenv import load_dotenv
+from pydantic import BaseModel
+from abc import ABC, abstractmethod
+import os
 
-load_dotenv() # Load environment variables from .env file
-
-class BaseAgent:
-    def __init__(self, model_name: str = "gemini-flash", temperature: float = 0.5):
+class BaseAgent(ABC):
+    def __init__(self, model_name: str = "gemini-2.0-flash"):
+        load_dotenv()
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
             raise ValueError("GOOGLE_API_KEY environment variable not set.")
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(model_name=model_name)
-        self.temperature = temperature
+        self.model = genai.GenerativeModel(model_name)
 
-    def _generate_content(self, prompt: str, output_model: BaseModel):
-        """Helper to generate content using the specified model and parse with Pydantic."""
-        response = self.model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                temperature=self.temperature,
-                response_mime_type="application/json",
-                response_schema=output_model.model_json_schema()
-            )
-        )
+    @abstractmethod
+    def run(self, *args, **kwargs):
+        pass
+
+    def _generate_content(self, prompt: str, output_model: type[BaseModel]) -> BaseModel:
         try:
+            response = self.model.generate_content(
+                prompt,
+                generation_config={"response_mime_type": "application/json"}
+            )
             return output_model.model_validate_json(response.text)
         except Exception as e:
-            print(f"Error parsing model output: {e}")
-            print(f"Raw response text: {response.text}")
+            print(f"Error during content generation or parsing in BaseAgent: {e}")
+            if 'response' in locals() and hasattr(response, 'text'):
+                print(f"Raw model response text: {response.text}")
+            if 'response' in locals() and hasattr(response, 'prompt_feedback') and response.prompt_feedback:
+                print(f"Prompt feedback: {response.prompt_feedback}")
             raise

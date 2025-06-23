@@ -1,12 +1,43 @@
 from pydantic import BaseModel, Field
 from enum import Enum
 
-class CustomerTier(str, Enum):
+
+# Enums used across the system
+class Sentiment(Enum):
+    """Represents the sentiment of a support ticket."""
+    POSITIVE = "positive"
+    NEUTRAL = "neutral"
+    NEGATIVE = "negative"
+    URGENT = "urgent"
+
+class Priority(Enum):
+    """Represents the priority level of a support ticket."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    URGENT = "urgent"
+    CRITICAL = "critical"
+
+class Department(Enum):
+    """Represents the department a ticket can be routed to."""
+    TECHNICAL = "Technical"
+    BILLING = "Billing"
+    SALES = "Sales"
+    CUSTOMER_SUPPORT = "Customer_Support"
+    ACCOUNT_MANAGEMENT = "Account_Management"
+    SECURITY = "Security"
+    TECHNICAL_SUPPORT = "Technical_Support"
+    FEATURE_REQUEST = "Feature_Request" # Added FEATURE_REQUEST here
+
+class CustomerTier(Enum):
+    """Represents the customer's service tier."""
     FREE = "free"
     PREMIUM = "premium"
     ENTERPRISE = "enterprise"
 
+# Input Model for a Support Ticket
 class SupportTicket(BaseModel):
+    """Represents the structure of an incoming customer support ticket."""
     ticket_id: str
     customer_tier: CustomerTier
     subject: str
@@ -15,45 +46,28 @@ class SupportTicket(BaseModel):
     monthly_revenue: float
     account_age_days: int
 
-class Sentiment(str, Enum):
-    POSITIVE = "positive"
-    NEUTRAL = "neutral"
-    NEGATIVE = "negative"
-    URGENT = "urgent" # For critically negative/urgent messages
-
-class Priority(str, Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
-
-class Department(str, Enum):
-    TECHNICAL_SUPPORT = "Technical Support"
-    BILLING = "Billing"
-    FEATURE_REQUEST = "Feature Request"
-    SALES = "Sales"
-    SECURITY = "Security"
-    GENERAL_INQUIRY = "General Inquiry"
-    URGENT_RESPONSE_TEAM = "Urgent Response Team"
-
-# Agent-specific output models (can also be in respective agent files if preferred)
+# Output Models for individual Agents
 class SentimentAnalysisOutput(BaseModel):
+    """Output structure for the Sentiment Agent."""
     sentiment: Sentiment
-    reasoning: str = Field(description="Explanation for the determined sentiment.")
+    reasoning: str = Field(description="Detailed reasoning for the sentiment analysis.")
 
 class PriorityAssignmentOutput(BaseModel):
+    """Output structure for the Priority Agent."""
     priority: Priority
-    reasoning: str = Field(description="Explanation for the assigned priority.")
+    reasoning: str = Field(description="Detailed reasoning for the priority assignment.")
 
-class RoutingOutput(BaseModel):
+class TicketRoutingOutput(BaseModel):
+    """Output structure for the Router Agent."""
     routed_to_department: Department
-    summary: str = Field(description="A brief summary of the ticket and recommended action.")
-    reasoning: str = Field(description="Explanation for the routing decision.")
+    summary: str = Field(description="A brief summary of the ticket for the receiving department.")
+    reasoning: str = Field(description="Detailed reasoning for the routing decision.")
 
-# Combined output model for the entire processing flow
+# Combined Output Model for the overall system
 class AgentOutput(BaseModel):
+    """Combines the outputs from all agents into a single comprehensive result."""
     sentiment: Sentiment
     priority: Priority
     routed_to_department: Department
-    summary: str = Field(description="A brief summary of the ticket and recommended action.")
-    reasoning: str = Field(description="Comprehensive explanation for the assigned sentiment, priority, and routing.")
+    summary: str
+    reasoning: str

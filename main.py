@@ -11,13 +11,16 @@ def process_ticket(ticket: SupportTicket) -> AgentOutput:
     router_agent = RouterAgent()
 
     # 1. Sentiment Analysis
-    sentiment_output = sentiment_agent.analyze_sentiment(ticket)
+    # Call the run method of the SentimentAgent
+    sentiment_output = sentiment_agent.run(ticket)
 
     # 2. Priority Assignment
-    priority_output = priority_agent.assign_priority(ticket, sentiment_output.sentiment)
+    # Call the run method of the PriorityAgent
+    priority_output = priority_agent.run(ticket, sentiment_output.sentiment)
 
     # 3. Ticket Routing
-    routing_output = router_agent.route_ticket(ticket, sentiment_output.sentiment, priority_output.priority)
+    # Call the run method of the RouterAgent
+    routing_output = router_agent.run(ticket, sentiment_output.sentiment, priority_output.priority)
 
     # Combine results into a single AgentOutput
     return AgentOutput(
